@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 #define MaxSize 100
-#define Type BTree
+#define Type int
 
 //顺序栈存储结构定义
 typedef struct s{

@@ -5,7 +5,7 @@
 #define Queue_H
 #include "../treeAndBtree/bTree.c"
 
-typedef BTree Item;
+typedef int Item;
 typedef struct Qnode * PNode;
 typedef struct Qnode
 {
@@ -33,7 +33,7 @@ void ClearQueue(Queue *pqueue);
 int IsEmpty(Queue *pqueue);
 
 /*返回队列大小*/
-int GetSize(Queue *pqueue);
+int Size(Queue *pqueue);
 
 /*返回队头元素*/
 PNode GetFront(Queue *pqueue,Item *pitem);

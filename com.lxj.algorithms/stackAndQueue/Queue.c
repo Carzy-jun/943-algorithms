@@ -46,7 +46,7 @@ int IsEmpty(Queue *pqueue)
 }
 
 /*返回队列大小*/
-int GetSize(Queue *pqueue)
+int Size(Queue *pqueue)
 {
     return pqueue->size;
 }
@@ -73,20 +73,16 @@ PNode GetRear(Queue *pqueue,Item *pitem)
 }
 
 /*将新元素入队*/
-PNode EnQueue(Queue *pqueue,Item item)
-{
+PNode EnQueue(Queue *pqueue,Item item) {
     PNode pnode = (PNode)malloc(sizeof(Node));
-    if(pnode != NULL)
-    {
+    if(pnode != NULL) {
         pnode->data = item;
         pnode->next = NULL;
 
-        if(IsEmpty(pqueue))
-        {
+        if(IsEmpty(pqueue)) {
             pqueue->front = pnode;
         }
-        else
-        {
+        else {
             pqueue->rear->next = pnode;
         }
         pqueue->rear = pnode;
@@ -96,7 +92,7 @@ PNode EnQueue(Queue *pqueue,Item item)
 }
 
 /*队头元素出队*/
-PNode DeQueue(Queue *pqueue,Item *pitem)
+PNode DeQueue(Queue *pqueue,Item *pitem) \
 {
     PNode pnode = pqueue->front;
     if(IsEmpty(pqueue)!=1&&pnode!=NULL)

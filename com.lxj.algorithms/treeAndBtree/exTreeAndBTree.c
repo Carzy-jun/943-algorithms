@@ -102,11 +102,7 @@ int Depth(BTree T){
     } else {
         ldepth = Depth(T->lchlid);
         rdepth = Depth(T->rchlid);
-        if (ldepth > rdepth) {
-            return ldepth+1;
-        } else {
-            return rdepth+1;
-        }
+        return ldepth > rdepth ? ldepth : rdepth;
     }
 }
 //非递归求二叉树深度
@@ -301,6 +297,12 @@ BTree PreInCreate(int A[], int B[], int loa, int hia, int lob,int hib){
     }
     return T;
 }
+//中序遍历和后序遍历建立二叉树
+BTree InPostCreate(int in[], int post[]){
+
+}
+
+
 //7.写一个判别给定二叉树是否是完全二叉树
 int isCompleteBinaryBtree(BTree T){
     Queue *Q = InitQueue();
@@ -345,82 +347,186 @@ void ExchangeNode(BTree T){//前序遍历实现
     ExchangeBT(T->rchlid);
 }
 //10.求二叉树先序遍历中第k个节点的值
+int p=1,ch;
 int GetValueFromPreOrder(BTree T, int k){
-
+    if (T == NULL) {
+        return -1;
+    }
+    if (p == k) {
+        return T->data;
+    }
+    p++;
+    ch = GetValueFromPreOrder(T->lchlid,k);
+    if (ch != -1) {
+        return ch;
+    }
+    ch = GetValueFromPreOrder(T->rchlid, k);
+    return ch;
 }
 
 //11.对于二叉树中每个元素值为x的节点，删去以它为根的子树，并释放相应的空间
 void DeleteCt(BTree T, int x){
-    BTree p = T;
-    if (p->data == x) {
-        DestoryBT(p);
+    BTree p;
+    Queue *Q = InitQueue();
+    EnQueue(Q,T);
+    if (T->data == x) {
+        DestoryBT(T);
         return;
     }
-    SqStack S;InitStack(&S);
-    while (!StackEmpty(S) || p) {
-        while (p) {
+    while (!IsEmpty(Q)) {
+        DeQueue(Q,&p);
+        if (p->lchlid) {
             if (p->lchlid->data == x) {
                 DestoryBT(p->lchlid);
-                p->lchlid = NULL;
+                p->lchlid = NULL; //这一步不能少。
+            } else {
+                EnQueue(Q,p->lchlid);
             }
+        }
+        if (p->rchlid) {
             if (p->rchlid->data == x) {
                 DestoryBT(p->rchlid);
                 p->rchlid = NULL;
+            } else {
+                EnQueue(Q,p->rchlid);
             }
-            Push(&S,p);
-            p = p->lchlid;
         }
-        Pop(&S, &p);
-        p = p->rchlid;
     }
 }
 
 //12.在二叉树中查找值为x的节点，打印值为x的节点的所有祖先，
 //假设值为x的节点不多于一个
-void FindAndPtX(BTree T, int x){
-
+void FindAndPtX(BTree T, int x){  //利用后序遍历找到x后栈中元素均为祖先
+    BTree p = T;int t;
+    SqStack S1,S2;InitStack(&S1);InitStack(&S2);
+    while (!StackEmpty(S1) || p) {
+        while (p) {
+            Push(&S1, p);
+            Push1(&S2, 0);
+            p = p->lchlid;
+        }
+        Pop(&S1, &p);
+        Pop1(&S2, &t);
+        if (t == 0) {
+            Push(&S1,p);
+            Push1(&S2,1);
+            p = p->rchlid;
+        } else {
+            if (p->data == x) {
+                while (!StackEmpty(S1)) {
+                    Pop(&S1,&p);
+                    printf("%d\t", p->data);
+                }
+                return;
+            }
+            p = NULL;
+        }
+    }
 }
 //13.找到p、q最近公共祖先节点r
-void Ancestor(BTree T, BTree r, BTree p, BTree q){
-
+BTree Ancestor(BTree T, BTree p, BTree q){
+    SqStack S1,S2,S3;InitStack(&S1);InitStack(&S2);InitStack(&S3);
+    BTree s = T;int t;
+    while (!StackEmpty(S1) || s) {
+        while (s) {
+            Push(&S1, s);
+            Push1(&S2, 0);
+            s = s->lchlid;
+        }
+        Pop(&S1, &s);
+        Pop1(&S2, &t);
+        if (t == 0) {
+            Push(&S1, s);
+            Push1(&S2, 1);
+            s = s->rchlid;
+        } else {
+            if (s->data == p->data) {
+                for (int i = 0; i <= S1.top ; i++) {
+                    S3.data[i] = S1.data[i];
+                }
+                S3.top = S1.top;
+            }
+            if (s->data == q->data) {
+                for (int i = S3.top; i >= 0 ; --i) {
+                    for (int j = S1.top; j >= 0 ; --j) {
+                        if (S1.data[j]->data == S3.data[i]->data) {
+                            return S3.data[i];
+                        }
+                    }
+                }
+            }
+            s = NULL;
+        }
+    }
+    return NULL;
 }
 
 //14.求非空二叉树的宽度
+//我们知道层序遍历二叉树是使用queue来实现的：每次打印一个节点之后，
+// 如果存在左右子树，则把左右子树压入queue，那么此时的队列中可能既包含当前层的节点，
+// 也包含下一层的节点。而我们要求的是对于特定某一层的节点的个数，
+// 因此我们需要从头结点开始，记录每一层的个数，对于当前层的每一个节点，
+// 在弹出自身之后把其左右子树压入queue，当把当前层全部弹出队列之后，
+// 在队列中剩下的就是下一层的节点。然后比较队列的size和之前得到的maxWidth，
+// 取最大值即为队列的宽度。最终队列为空，得到的maxWidth就是二叉树的宽度！
 int GetBTWidth(BTree T){
-    int llen = 0, rlen = 0,curllen = 0, currlen = 0;
-    SqStack S; InitStack(&S);
+    if (!T) return 0;  //数为空宽度为0
+    Queue *Q = InitQueue();
+    int maxWidth = 1;//最大宽度，用于当只有一个节点的时候返回1
     BTree p = T;
-    while (p || !StackEmpty(S)) {
-        while (p) {
-            if (llen < curllen) {
-                llen = curllen;
-            }
-            if (rlen < currlen) {
-                rlen = curllen;
-            }
-            Push(&S, p);
-            p = p ->lchlid;
-            curllen++;
-            currlen--;
+    EnQueue(Q, p); //头节点入队
+    while (true) {
+        int length = Size(Q); //当前层节点的个数
+        if (length == 0) { //当层没有节点，跳出循环
+            break;
         }
-        Pop(&S, &p);
-        p = p->rchlid;
-        curllen--;
-        currlen++;
+        while (length > 0) {//若当层还有节点，将该层所有子节点入队，知道该层节点都已出队
+            DeQueue(Q,&p);
+            length--;
+            if (p->lchlid) {
+                EnQueue(Q,p->lchlid);
+            }
+            if (p->rchlid) {
+                EnQueue(Q,p->rchlid);
+            }
+        }
+        maxWidth = maxWidth > Size(Q)? maxWidth: Size(Q); //比较每一层的宽度
     }
-    return llen + rlen + 1;
+    return maxWidth;
 }
-int main(){
-    int a[]={1,2,4,5,3,6,7};
-    int b[]={4,2,5,1,6,3,7};
-//    BTree T = CreateBT(a, 8, 1);
-    BTree T = PreInCreate(a,b,0,6,0,6);
-    LevelOrder(T);
-//    int d = GetBTWidth(T);
-    printf("\n" );
-    PreOrder(T);
-//    printf("%d",d);
-//    ExchangeBT(T);
-//    LevelOrder(T);
+//15.设有一颗满二叉树（所有节点值均不同），已知其先序序列为pre，求其后序序列post
+void PreToPost(int pre[], int l1, int h1, int post[], int l2, int h2){
+    int half;
+    if (h1 >= l1) {
+        post[h2] = pre[l1];
+        half = (h1-l1)/2;
+        PreToPost(pre, l1+1, l1+half, post, l2, l2+half-1);
+        PreToPost(pre, l1+half+1, h1, post, l2+half, h2-1);
+    }
+}
+
+//16.将二叉树的叶节点按从左到右的顺序连成一个单链表，表头指针为head.
+LinkList Linkleafnode(BTree T){
 
 }
+//17.判断两颗二叉树是否相似，T1,T2都为空或都只有一个根节点，或T1，T2的左子树相似且右子树相似
+bool IsSimailer(BTree T1, BTree T2){
+    if (!T1 && !T2) {
+        return true;
+    }
+    if (!T1 || !T2) {
+        return false;
+    }
+    return IsSimailer(T1->lchlid,T2->lchlid)&&IsSimailer(T1->rchlid,T2->rchlid);
+}
+
+
+//int main(){
+//    int a[]={0,1,2,3,4,5,0,7,8,9,10,11,12,13,14};
+//    int b[]={1,2,4,5,3,6,7};
+//    BTree T = CreateBT(a, 14, 1);
+//    BTree T1 = CreateBT(b, 8, 1);
+//    LevelOrder(T);
+//    printf("\n" );
+//    LevelOrder(T);
+//}

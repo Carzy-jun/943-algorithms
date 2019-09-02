@@ -3,4 +3,4 @@ project(Algorithms C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(Algorithms com.lxj.algorithms/treeAndBtree/exTreeAndBTree.c)
+add_executable(Algorithms com.lxj.algorithms/map/map.c)
