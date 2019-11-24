@@ -248,7 +248,17 @@ void InvertOrder(BTree T){
     }
 }
 //5.设计一个非递归算法求二叉树的高度
+//递归
 int GetHigh(BTree T){
+    if (T == NULL) {
+        return 0;
+    }
+    int l = GetHigh(T->lchlid);
+    int r = GetHigh(T->rchlid);
+    return l>r?l+1:r+1;
+}
+//非递归
+int GetHigh1(BTree T){
     int maxlength = 0, curlength = 0,x;
     SqStack S1,S2;InitStack(&S1);InitStack(&S2);
     BTree p = T;
@@ -279,27 +289,40 @@ int GetHigh(BTree T){
 
 //6.设一颗二叉树中各节点中的值互不相同，其先序遍历序列和中序遍历序列
 //  分别存于两个一维数组A[1...n]和B[1...n]中，试建立该二叉树的二叉链表
-BTree PreInCreate(int A[], int B[], int loa, int hia, int lob,int hib){
-    BTree T = (BTree)malloc(sizeof(BTree));
-    T->data = A[loa];
-    int i;
-    for (i = lob; B[i] != T->data ; ++i);
-    int llen = i-lob, rlen = hib-i;
-    if (llen) {
-        T->lchlid = PreInCreate(A, B, loa+1, loa+llen, lob, lob+llen-1);
-    } else {
-        T->lchlid = NULL;
+BTree PreInCreate(int *pre, int *in, int n){
+    int k,*p;
+    BTree b;
+    if (n <= 0) {
+        return NULL;
     }
-    if (rlen) {
-        T->rchlid = PreInCreate(A, B, hia-rlen+1, hia, hib-rlen+1, hib);
-    } else {
-        T->rchlid = NULL;
+    b = (BTree)malloc(sizeof(BiNode));
+    b->data = *pre;
+    for (p = in; p < in+n; p++) {
+        if (*p == *pre)break;
     }
-    return T;
+    k = (int) (p - in);
+    b->lchlid = PreInCreate(pre+1,in,k);
+    b->rchlid = PreInCreate(pre+k+1,p+1,n-k-1);
+    return b;
 }
 //中序遍历和后序遍历建立二叉树
-BTree InPostCreate(int in[], int post[]){
-
+BTree InPostCreate(int *in, int *post,int n){
+    int k,*p,r;
+    BTree b;
+    if (n <= 0) {
+        return NULL;
+    }
+    b = (BTree)malloc(sizeof(BiNode));
+    r = *(post+n-1);
+    b->data = r;
+    for (p = in; p < in+n; p++) {
+        if (*p == r)
+            break;
+    }
+    k = (int) (p - in);
+    b->lchlid = InPostCreate(in,post,k);
+    b->rchlid = InPostCreate(p+1,post+k-1,n-k-1);
+    return b;
 }
 
 
@@ -449,9 +472,9 @@ BTree Ancestor(BTree T, BTree p, BTree q){
             if (s->data == q->data) {
                 for (int i = S3.top; i >= 0 ; --i) {
                     for (int j = S1.top; j >= 0 ; --j) {
-                        if (S1.data[j]->data == S3.data[i]->data) {
-                            return S3.data[i];
-                        }
+//                        if (S1.data[j]->data == S3.data[i]->data) {
+//                            return S3.data[i];
+//                        }
                     }
                 }
             }
@@ -462,13 +485,6 @@ BTree Ancestor(BTree T, BTree p, BTree q){
 }
 
 //14.求非空二叉树的宽度
-//我们知道层序遍历二叉树是使用queue来实现的：每次打印一个节点之后，
-// 如果存在左右子树，则把左右子树压入queue，那么此时的队列中可能既包含当前层的节点，
-// 也包含下一层的节点。而我们要求的是对于特定某一层的节点的个数，
-// 因此我们需要从头结点开始，记录每一层的个数，对于当前层的每一个节点，
-// 在弹出自身之后把其左右子树压入queue，当把当前层全部弹出队列之后，
-// 在队列中剩下的就是下一层的节点。然后比较队列的size和之前得到的maxWidth，
-// 取最大值即为队列的宽度。最终队列为空，得到的maxWidth就是二叉树的宽度！
 int GetBTWidth(BTree T){
     if (!T) return 0;  //数为空宽度为0
     Queue *Q = InitQueue();
@@ -505,10 +521,6 @@ void PreToPost(int pre[], int l1, int h1, int post[], int l2, int h2){
     }
 }
 
-//16.将二叉树的叶节点按从左到右的顺序连成一个单链表，表头指针为head.
-LinkList Linkleafnode(BTree T){
-
-}
 //17.判断两颗二叉树是否相似，T1,T2都为空或都只有一个根节点，或T1，T2的左子树相似且右子树相似
 bool IsSimailer(BTree T1, BTree T2){
     if (!T1 && !T2) {
@@ -522,11 +534,12 @@ bool IsSimailer(BTree T1, BTree T2){
 
 
 //int main(){
-//    int a[]={0,1,2,3,4,5,0,7,8,9,10,11,12,13,14};
+//    int a[]={0,1,2,3,4,5,0,7,8,9,10,11,12,13,14,1,2};
 //    int b[]={1,2,4,5,3,6,7};
-//    BTree T = CreateBT(a, 14, 1);
+//    BTree T = CreateBT(a, 16, 1);
 //    BTree T1 = CreateBT(b, 8, 1);
 //    LevelOrder(T);
 //    printf("\n" );
-//    LevelOrder(T);
+//    int h = GetHigh(T);
+//    printf("%d\t", h);
 //}

@@ -1,6 +1,8 @@
 //
 // Created by 李学俊 on 2019/7/7.
 //
+
+//
 //用标记tag来区分队满和队空
 #define MaxSize 50
 typedef struct {

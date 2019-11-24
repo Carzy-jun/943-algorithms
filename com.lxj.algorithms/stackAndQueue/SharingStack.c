@@ -1,6 +1,8 @@
 //
 // Created by 李学俊 on 2019/7/7.
 //
+
+//共享栈
 #include <stdbool.h>
 
 #define MaxSize 100

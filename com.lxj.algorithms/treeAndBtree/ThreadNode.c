@@ -3,6 +3,7 @@
 //
 // Created by 李学俊 on 2019/7/17.
 //
+//线索二叉树
 typedef struct ThreadTree{
     int data;
     struct ThreadTree *lchild, *rchild;

@@ -86,7 +86,7 @@ void DeQueue1(SqQueue *Q, Type *x){
         printf("队为空，出队失败\n");
 }
 
-////1.判断单链表L中元素是否中心对称
+//1.判断单链表L中元素是否中心对称
 //int IsCentrosymmetry(LinkList *L){
 //    SqStack S; int x; LNode *s = L;
 //    InitStack(&S);
